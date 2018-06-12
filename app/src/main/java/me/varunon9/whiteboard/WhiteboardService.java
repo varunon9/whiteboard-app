@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 public class WhiteboardService extends Service {
     private static final String LOG_TAG = "WhiteboardService";
-    public static boolean IS_SERVICE_RUNNING = false;
 
     public WhiteboardService() {
     }
@@ -45,22 +44,12 @@ public class WhiteboardService extends Service {
     }
 
     private void startForegroundService() {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
+        Intent notificationIntent = new Intent(this, WhiteboardActivity.class);
         notificationIntent.setAction(Constants.Actions.MAIN_ACTION);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, 0);
-
-        Intent editIntent = new Intent(this, WhiteboardService.class);
-        editIntent.setAction(Constants.Actions.EDIT_TODO_ACTION);
-        PendingIntent pendingEditIntent = PendingIntent.getService(this,
-                0, editIntent, 0);
-
-        Intent closeIntent = new Intent(this, WhiteboardService.class);
-        closeIntent.setAction(Constants.Actions.STOPFOREGROUND_ACTION);
-        PendingIntent pendingCloseIntent = PendingIntent.getService(this,
-                0, closeIntent, 0);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setPriority(Notification.PRIORITY_MAX)
@@ -71,8 +60,6 @@ public class WhiteboardService extends Service {
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Close", pendingCloseIntent)
-                .addAction(android.R.drawable.ic_menu_edit, "Edit", pendingEditIntent)
                 .build();
 
         startForeground(Constants.NOTIFICATION_ID, notification);
