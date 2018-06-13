@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Whiteboard</title>
+    <meta charset="utf-8"/>
+    <meta name="description" 
+            content="Your Whiteboard, basically a text-editor which will remember its content."/>
+    <meta name="author" content="varunon9@gmail.com">
+    <link rel="author" href="https://plus.google.com/u/0/104979787684845609573" />
+    <meta name="viewport" 
+            content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no,user-scalable=0"/>
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-X: hidden;
+        }
+
+        #writeArea {
+            position: relative;
+            width: calc(100% - 32px);
+            height: 91%;
+            overflow-X: hidden;
+            padding: 16px;
+            background: #eeeeee;
+            font-size: 15px;
+            font-family: sans-serif;
+        }
+
+        #writeArea:focus {
+            outline: none;
+        }
+
+        #chooseColor {
+            position: fixed;
+            bottom: 48px;
+            right: 0;
+            width: 110px;
+            padding: 0.5%;
+            box-shadow: 1px 2px 1px silver;
+            background: white;
+            z-index: 2;
+        }
+
+        .colorBox {
+            width: 20px;
+            height: 20px;
+            float: left;
+            margin: 1px;
+            cursor: pointer;
+        }
+
+        #bottomBar {
+            position: fixed;
+            z-index: 2;
+            bottom: 0;
+            width: 416px;
+            overflow: hidden;
+            background: #3F51B5;
+            height: 50px;
+        }
+
+        #bottomBar .button {
+            height: 100%;
+            border: none;
+            width: 42px;
+            background-position: center;
+            outline: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #bottomBar .button:active {
+            border-top: 2px solid;
+        }
+
+        #saveButton {
+            background: url('save_white.png');
+        }
+
+        #clearButton {
+            background: url('clear_white.png');
+        }
+
+        #boldButton {
+            background: url('bold_white.png');
+        }
+
+        #underlineButton {
+            background: url('underline_white.png');
+        }
+        
+        #italicButton {
+            background: url('italic_white.png');
+        }
+
+        #undoButton {
+            background: url('undo_white.png');
+        }
+
+        #redoButton {
+            background: url('redo_white.png');
+        }
+
+        #textColorButton {
+            background: url('color_white.png');
+        }
+
+    </style>
+</head>
+<body>
+    <div contenteditable="true" id="writeArea">
+        Write something here ...
+    </div>
+    <div id="chooseColor">
+    </div>
+    <div id="bottomBar">
+        <button class="button" id="saveButton"></button>
+        <button class="button" id="clearButton"></button>
+        <button class="button" id="undoButton"></button>
+        <button class="button" id="redoButton"></button>
+        <button class="button" id="boldButton"></button>
+        <button class="button" id="underlineButton"></button>
+        <button class="button" id="italicButton"></button>
+        <button class="button" id="textColorButton"></button>
+    </div>
+</body>
+<script>
+    (function (windowObject, documentObject) {
+        var fontColorArray = [
+            '#880E4F', '#9C27B0', '#673AB7', '#3F51B5', '#00BCD4', '#006064', '#01579B', '#009688', '#4CAF50', '#795548',
+            '#9E9E9E', 'black', 'gray', 'white', '#333', 'yellow', 'lime', 'aqua', 'fuchsia', 'red', 'green', 'blue',
+            'purple', 'maroon', 'olive', 'silver', 'navy', 'teal'
+        ];
+        var functions = {
+            buildElement: function (tag, className, styleObject, text) {
+                var element = documentObject.createElement(tag);
+                if (className) {
+                    element.className = className;
+                }
+                //setting style
+                if (styleObject) {
+                    Object.keys(styleObject).forEach(function (key) {
+                        element.style[key] = styleObject[key];
+                    });
+                }
+                if (text) {
+                    var textNode = documentObject.createTextNode(text);
+                    element.appendChild(textNode);
+                }
+                return element;
+            },
+            addColorBoxes: function (chooseColorDiv) {
+                for (var i = 0; i < fontColorArray.length; i++) {
+                    var styleObject = {
+                        background: fontColorArray[i]
+                    };
+                    var colorBox = functions.buildElement('div', 'colorBox', styleObject, null);
+                    chooseColorDiv.appendChild(colorBox)
+                }
+            },
+            toggleDisplay: function (element) {
+                element.style.display = (element.style.display == 'none') ? 'block' : 'none';
+            },
+            changeFontColor: function (event) {
+                var element = event.target || event.srcElement;
+                var color = element.style.background;
+                var temp = color.indexOf('none');
+                if (temp != -1) {
+                    color = color.slice(0, (temp - 1));
+                }
+                documentObject.execCommand('styleWithCSS', false, true);
+                documentObject.execCommand('foreColor', false, color);
+                event.preventDefault();
+            },
+            saveWhiteboardContent: function(documentText) {
+                localStorage.setItem('whiteboardContent', documentText);
+            }
+        };
+
+        windowObject.onload = function () {
+            var saveButton = documentObject.getElementById('saveButton'),
+                boldButton = documentObject.getElementById('boldButton'),
+                clearButton = documentObject.getElementById('clearButton'),
+                underlineButton = documentObject.getElementById('underlineButton'),
+                italicButton = documentObject.getElementById('italicButton'),
+                textColorButton = documentObject.getElementById('textColorButton'),
+                chooseColorDiv = documentObject.getElementById('chooseColor'),
+                chooseFontSizeDiv = documentObject.getElementById('chooseFontSize')
+                chooseFontFamilyDiv = documentObject.getElementById('chooseFontFamily'),
+                writeAreaDiv = documentObject.getElementById('writeArea'),
+                undoButton = documentObject.getElementById('undoButton'),
+                redoButton = documentObject.getElementById('redoButton');
+            //checking if documentText is set
+            var documentText = localStorage.getItem('whiteboardContent');
+            if (documentText) {
+                writeAreaDiv.innerHTML = documentText;
+            } else {
+                writeAreaDiv.text = 'Write something here...';
+            }
+            //adding color to choose from
+            functions.addColorBoxes(chooseColorDiv);
+            chooseColorDiv.style.display = 'none';
+            //registering toggle event on textColorButton
+            textColorButton.addEventListener('mousedown', function (event) {
+                functions.toggleDisplay(chooseColorDiv);
+                event.preventDefault();
+            });
+
+            writeArea.addEventListener('click', function () {
+                chooseColorDiv.style.display = 'none';
+                chooseFontSizeDiv.style.display = 'none';
+                chooseFontFamilyDiv.style.display = 'none';
+            });
+
+            saveButton.addEventListener('mousedown', function (event) {
+                var documentText = writeAreaDiv.innerHTML;
+                functions.saveWhiteboardContent(documentText);
+                event.preventDefault();
+            });
+
+            //editing text
+            boldButton.addEventListener('mousedown', function (event) {
+                //documentObject.execCommand('bold', false, windowObject.getSelection().toString());
+                documentObject.execCommand('bold');
+                event.preventDefault();
+            });
+
+            clearButton.addEventListener('mousedown', function (event) {
+                writeAreaDiv.innerHTML = '';
+                event.preventDefault();
+            });
+
+            underlineButton.addEventListener('mousedown', function (event) {
+                documentObject.execCommand('underline');
+                event.preventDefault();
+            });
+
+            italicButton.addEventListener('mousedown', function (event) {
+                documentObject.execCommand('italic');
+                event.preventDefault();
+            });
+
+            for (var i = 0; i < fontColorArray.length; i++) {
+                documentObject.getElementsByClassName('colorBox')[i].addEventListener('mousedown', functions.changeFontColor);
+            }
+
+            undoButton.addEventListener('click', function () {
+                documentObject.execCommand('undo');
+            });
+
+            redoButton.addEventListener('click', function () {
+                documentObject.execCommand('redo');
+            });
+
+            windowObject.addEventListener('unload', function (event) {
+                var documentText = writeAreaDiv.innerHTML;
+                functions.saveWhiteboardContent(documentText);
+            });
+        };
+    })(window, document);
+</script>
+</html>

@@ -27,7 +27,7 @@ public class WhiteboardService extends Service {
         if (action.equals(Constants.Actions.STARTFOREGROUND_ACTION)) {
             Log.i(LOG_TAG, "Received Start Foreground Intent ");
             startForegroundService();
-            Toast.makeText(this, "WhiteboardService Started!",
+            Toast.makeText(this, "Notification started!",
                     Toast.LENGTH_SHORT).show();
         } else if (action.equals(Constants.Actions.EDIT_TODO_ACTION)) {
             Log.i(LOG_TAG, "Received Edit TODO Intent ");
@@ -44,7 +44,7 @@ public class WhiteboardService extends Service {
     }
 
     private void startForegroundService() {
-        Intent notificationIntent = new Intent(this, WhiteboardActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setAction(Constants.Actions.MAIN_ACTION);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -69,7 +69,7 @@ public class WhiteboardService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.i(LOG_TAG, "In onDestroy");
-        Toast.makeText(this, "WhiteboardService Destroyed!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Notification Stopped!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
