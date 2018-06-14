@@ -65,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
             Intent service = new Intent(MainActivity.this, WhiteboardService.class);
             stopService(service);
             return true;
-        } else if (id == R.id.action_settings) {
-            return true;
         }
 
         return super.onOptionsItemSelected(item);
